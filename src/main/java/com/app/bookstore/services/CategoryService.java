@@ -23,8 +23,24 @@ public class CategoryService {
 
     public void createCategory(Category category) {
         categoryLog.info("===== CREATING NEW CATEGORY =====");
+        for (Category x : getAllCategories()) {
+            if (x.getName().equals(category.getName())) {
+                return;
+            }
+        }
         categoryRepository.save(category);
     }
+
+//    public void createCategory(Category category) {
+//        for (Category x : getAllCategories()) {
+//            if (x.getName().equals(category.getName())) {
+//                return;
+//            }
+//        }
+//        categoryRepository.save(category);
+//    }
+
+
 
     public void updateCategory(Category category, Long categoryId) {
         categoryLog.info("===== UPDATING CATEGORY =====");
@@ -54,4 +70,5 @@ public class CategoryService {
             return true;
         } return false;
     }
+
 }

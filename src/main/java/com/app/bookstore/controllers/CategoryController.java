@@ -23,16 +23,19 @@ public class CategoryController {
     BookService bookService;
 
     @PostMapping("/category")
-    public ResponseEntity<?> createCategory(@RequestBody Category category) {
-            if ( for (Category x : getAllCategories()) {
-            x.getName().equals(category.getName())) {
-                CodeMessage exception = new CodeMessage(400, "Category Already Exists!");
-                return new ResponseEntity<>(exception, HttpStatus.BAD_REQUEST);
-            }
-        }
-        CodeMessageData response = new CodeMessageData(200, "Success", category);
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    public void createCategory(@RequestBody Category category) {
+        categoryService.createCategory(category);
     }
+
+//    @PostMapping("/category")
+//    public void createCategory(@RequestBody Category category) {
+//        for (Category x : getAllCategories()) {
+//            if (x.getName().equals(category.getName())) {
+//                return;
+//            }
+//        }
+//        categoryService.createCategory(category);
+//    }
 
     @PutMapping("/category/{categoryId}")
     public ResponseEntity<?> updateCategory(@PathVariable Long categoryId, @RequestBody Category category) {
