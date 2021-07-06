@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,9 +22,9 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    public void createBook(Book book) {
+    public Book createBook(Book book) {
         bookLog.info("===== CREATING NEW BOOK =====");
-        bookRepository.save(book);
+        return bookRepository.save(book);
     }
 
     public List<Book> getAllBooks() {
@@ -33,9 +34,9 @@ public class BookService {
         return listOfBooks;
     }
 
-    public Book getBookById(Long id) {
+    public Optional<Book> getBookById(Long id) {
         bookLog.info("===== GETTING BOOK BY BOOK ID =====");
-        return bookRepository.findById(id).get();
+        return bookRepository.findById(id);
     }
 
     public void updateBook(Book book, Long id) {
@@ -67,5 +68,9 @@ public class BookService {
                 .filter(b -> b.getName().contains(keyword))
                 .collect(Collectors.toList());
         return listOfBooks;
+    }
+    public boolean bookCheck(Long bookId){
+        Book book = bookRepository.findById(bookId).orElse(null);
+        return book != null;
     }
 }

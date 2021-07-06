@@ -49,4 +49,9 @@ public class CategoryService {
         return listOfCategories;
     }
 
+    public boolean categoryCheck(Long categoryId){
+        if (getCategoryById(categoryId) != null){
+            return true;
+        } return false;
+    }
 }

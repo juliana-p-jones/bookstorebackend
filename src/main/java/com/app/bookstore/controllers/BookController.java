@@ -1,12 +1,16 @@
 package com.app.bookstore.controllers;
 
 
+import com.app.bookstore.exceptionhandling.CodeMessage;
+import com.app.bookstore.exceptionhandling.CodeMessageData;
 import com.app.bookstore.models.Book;
 import com.app.bookstore.models.Category;
 import com.app.bookstore.repositories.CategoryRepository;
 import com.app.bookstore.services.BookService;
 import com.app.bookstore.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,59 +27,81 @@ public class BookController {
     @Autowired
     private CategoryRepository categoryRepository;
     @PostMapping("/book")
-    public void createBook(@RequestBody Book book) {
-        bookService.createBook(book);
-    }
-//       for (Category x : categoryService.getAllCategories()) {
-//           System.out.println("Category x: " + x.getName() + ", " + x.getId()) ;
-//           if (x.getName().equals(book.getCategory().getName())) {
-//                categoryService.deleteCategory(book.getCategory().getId());
-//                book.setCategory(x);
-//            }
-//        }
-//    }
-//        for (Category x : categoryService.getAllCategories()) {
-//           System.out.println("Category x: " + x.getName() + ", " + x.getId()) ;
-//           if (x.getName().equals(book.getCategory().getName())) {
-//                Long tempId = book.getCategory().getId();
-//               System.out.println("before set cat");
-//               book.setCategory(x);
-//               System.out.println("before delete");
-//               categoryRepository.deleteById(tempId);
-//               System.out.println("after delete");
-//               System.out.println(book.getCategory().getId());
-//            }
-//        }
-//    }
-    @GetMapping("/book/{id}")
-    public Book getBookById(@PathVariable Long id){
-        return bookService.getBookById(id);
+    public ResponseEntity<?> createBook(@RequestBody Book book) {
+        try {
+            CodeMessageData response = new CodeMessageData(200, "New Book Created",  bookService.createBook(book));
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception e){
+            CodeMessage error = new CodeMessage(404, "Error creating customer");
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        }
     }
 
+    @GetMapping("/book/{id}")
+    public ResponseEntity<?> getBookById(@PathVariable Long id) {
+        Book book = bookService.getBookById(id).orElse(null);
+        if (book == null) {
+            CodeMessage error = new CodeMessage(404, "Error Fetching Book");
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        }
+        CodeMessageData response = new CodeMessageData(200, "Success", book);
+        return new ResponseEntity<> (response, HttpStatus.OK);
+    }
+
+
     @PutMapping("/book/{id}")
-    public void updateBook(@PathVariable Long id, @RequestBody Book book){
+    public ResponseEntity<?>  updateBook(@PathVariable Long id, @RequestBody Book book){
+        if(!bookService.bookCheck(id)){
+            CodeMessage exception = new CodeMessage("Book ID Does Not Exist");
+            return new ResponseEntity<>(exception, HttpStatus.NOT_FOUND);
+        }
         bookService.updateBook(book, id);
+        CodeMessage response = new CodeMessage(202, "Accepted Book Modification");
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/book/{id}")
-    public void deleteBook(@PathVariable Long id){
+    public ResponseEntity<?> deleteBook(@PathVariable Long id){
+        if(!bookService.bookCheck(id)){
+            CodeMessage exception = new CodeMessage("This ID Does Not Exist in Book");
+            return new ResponseEntity<>(exception, HttpStatus.NOT_FOUND);
+        }
         bookService.deleteBook(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+
     @GetMapping("/books")
-    public List<Book> getAllBooks() {
+    public ResponseEntity<?> getAllBooks() {
         List<Book> books = bookService.getAllBooks();
-        return books;
+        if(books.isEmpty()){
+            CodeMessage error = new CodeMessage(404, "Error Fetching Books");
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        }
+
+        CodeMessageData response = new CodeMessageData(200, "Success", books);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/books/category/{categoryId}")
-    public List<Book> getAllBooksByCategory(@PathVariable Long categoryId){
-        List<Book> books = bookService.getAllBooksByCategory(categoryId);
-        return books;
+    public ResponseEntity<?> getAllBooksByCategory(@PathVariable Long categoryId){
+        Iterable<Book> books = bookService.getAllBooksByCategory(categoryId);
+        if (books.iterator().hasNext()) {
+            CodeMessageData response = new CodeMessageData(200, "Success", books);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        CodeMessage exception = new CodeMessage(404,"Error Fetching Books");
+        return new ResponseEntity<>(exception, HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/books/search/{keyword}")
-    public List<Book> getBooksBySearch(@PathVariable String keyword){
-        return bookService.getBooksBySearch(keyword);
+    public ResponseEntity<?> getBooksBySearch(@PathVariable String keyword){
+        Iterable<Book> bookQueryList = bookService.getBooksBySearch(keyword);
+        if(bookQueryList.iterator().hasNext()) {
+            CodeMessageData response = new CodeMessageData(200, "Success", bookQueryList);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        CodeMessage exception = new CodeMessage(200, "No Matches Found");
+        return new ResponseEntity<>(exception, HttpStatus.NOT_FOUND);
     }
 }
