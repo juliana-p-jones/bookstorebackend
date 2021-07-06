@@ -22,31 +22,12 @@ public class BookController {
     private CategoryService categoryService;
     @Autowired
     private CategoryRepository categoryRepository;
+
     @PostMapping("/book")
     public void createBook(@RequestBody Book book) {
         bookService.createBook(book);
     }
-//       for (Category x : categoryService.getAllCategories()) {
-//           System.out.println("Category x: " + x.getName() + ", " + x.getId()) ;
-//           if (x.getName().equals(book.getCategory().getName())) {
-//                categoryService.deleteCategory(book.getCategory().getId());
-//                book.setCategory(x);
-//            }
-//        }
-//    }
-//        for (Category x : categoryService.getAllCategories()) {
-//           System.out.println("Category x: " + x.getName() + ", " + x.getId()) ;
-//           if (x.getName().equals(book.getCategory().getName())) {
-//                Long tempId = book.getCategory().getId();
-//               System.out.println("before set cat");
-//               book.setCategory(x);
-//               System.out.println("before delete");
-//               categoryRepository.deleteById(tempId);
-//               System.out.println("after delete");
-//               System.out.println(book.getCategory().getId());
-//            }
-//        }
-//    }
+
     @GetMapping("/book/{id}")
     public Book getBookById(@PathVariable Long id){
         return bookService.getBookById(id);
